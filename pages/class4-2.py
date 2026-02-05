@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import time
 
 ss = st.session_state
 
@@ -28,6 +29,32 @@ for name, details in ss.products.items():
     with cols[counter % coLNum]:
         st.image(details["image_path"], use_container_width=True)
         st.write(f"## {name}")
-        st.write(f"價格: {details['price']}")
-        st.write(f"庫存: {details['stock']}")
+        st.write(f"###價格: ${details['price']}")
+        st.write(f"###庫存: {details['stock']}")
+        if st.button(f"購買 {name}"):
+            if details["stock"] > 0:
+                details["stock"] -= 1
+                st.success(f"成功購買 {name}")
+            else:
+                st.error(f"{name}庫存不足")
+            time.sleep(1)
+            st.rerun()
     counter += 1
+
+st.title("新增商品庫存")
+
+(
+    col1,
+    col2,
+) = st.columns(2)
+selected_product = col1.selectbox("請選擇商品", list(ss.products.keys()))
+add_stock = col2.number_input("新增庫存數量", min_value=1, value=1, step=1)
+if st.button("新增庫存"):
+    ss.products[selected_product]["stock"] += add_stock
+    st.success(f"{selected_product} 庫存已新增 {add_stock} 件")
+    time.sleep(1)
+    st.rerun()
+
+st.title("目前商品庫存")
+for name, details in ss.products.items():
+    st.write(f"## {name} : {details['stock']} 件")
